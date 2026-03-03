@@ -13,17 +13,18 @@ task-manager/
 ├── client/          # React клиентское приложение
 ├── server/          # Node.js сервер приложений
 ├── database/        # SQL схемы и миграции
-└── docs/           # Документация API
 ```
 
 ## Архитектура
 
 ```
-React (Client)
+Browser
+   ↓
+React (Client) - порт 5173
        ↓ HTTP (JSON)
-Node.js (Express API)
+Node.js (Express API) - порт 3001
        ↓ TCP/IP
-PostgreSQL
+PostgreSQL - порт 5432
 ```
 
 ## Матрица доступа
@@ -58,9 +59,9 @@ PostgreSQL
 
 ## Безопасность
 
-- Аутентификация через JWT
+- Аутентификация через JWT (JSON Web Token)
 - Пароли хранятся в виде bcrypt-хеша
-- Ролевая модель доступа (RBAC)
+- Ролевая модель доступа (RBAC - Role-Based Access Control)
 - Middleware для проверки токена
 - Middleware для проверки роли
 - Клиент не имеет прямого доступа к базе данных
@@ -100,7 +101,7 @@ cd server
 npm install
 
 # Настройте переменные окружения в .env
-DATABASE_URL="postgresql://taskmanager_user:your_password@localhost:5432/taskmanager"
+DATABASE_URL="postgresql://postgres:amin123123@localhost:5432/taskmanager?schema=public"
 JWT_SECRET="your-super-secret-jwt-key-change-in-production"
 CLIENT_URL="http://localhost:5173"
 
@@ -163,12 +164,14 @@ PATCH /api/users/:id/role
 }
 ```
 
-## Архитектура
+# Принятые архитектурные решения
 
-```
-React (Client) - порт 5173
-       ↓ HTTP (JSON)
-Node.js (Express API) - порт 3001
-       ↓ TCP/IP
-PostgreSQL - порт 5432
-```
+| Решение               | Причина                     |
+| --------------------- | --------------------------- |
+| JWT вместо session    | Stateless, масштабируемость |
+| Prisma вместо raw SQL | Типобезопасность, миграции  |
+| React Query           | Управление server state     |
+| Context API           | Лёгкое управление auth      |
+| Middleware RBAC       | Чистая архитектура          |
+| UUID                  | Безопасность                |
+| Swagger               | Документация API            |

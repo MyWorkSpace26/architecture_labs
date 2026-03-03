@@ -160,7 +160,7 @@ const updateTask = async (req, res) => {
 
     // Проверка владения задачей для MODERATOR
     if (req.user.role !== "ADMIN" && existingTask.createdBy !== req.user.id) {
-      return res.status(403).json({ error: "Forbidden" });
+      return res.status(403).json({ error: "Forbidden - Your own tasks only" });
     }
 
     const updateData = {};

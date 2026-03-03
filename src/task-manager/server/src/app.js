@@ -4,7 +4,6 @@ const cors = require("cors");
 const helmet = require("helmet");
 const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
-const { authMiddleware } = require("./middleware/auth");
 const errorHandler = require("./middleware/errorHandler");
 
 const authRoutes = require("./routes/auth");
