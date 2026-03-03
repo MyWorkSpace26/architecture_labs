@@ -2,7 +2,7 @@ const prisma = require("../../config/prisma");
 
 const getUsers = async (req, res) => {
   try {
-    const { page = 1, limit = 10, role } = req.query;
+    const { page = 1, limit = 10, role, search } = req.query;
     const pageNum = parseInt(page);
     const limitNum = parseInt(limit);
     const skip = (pageNum - 1) * limitNum;
@@ -10,6 +10,12 @@ const getUsers = async (req, res) => {
     const where = {};
     if (role) {
       where.role = role;
+    }
+    if (search) {
+      where.OR = [
+        { username: { contains: search, mode: "insensitive" } },
+        { email: { contains: search, mode: "insensitive" } },
+      ];
     }
 
     const [users, total] = await Promise.all([
