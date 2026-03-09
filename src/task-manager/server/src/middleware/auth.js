@@ -1,6 +1,7 @@
 const jwt = require("jsonwebtoken");
 const prisma = require("../../config/prisma");
 
+//АУТЕНТИФИКАЦИЯ
 const authMiddleware = async (req, res, next) => {
   try {
     const token = req.header("Authorization")?.replace("Bearer ", "");
@@ -10,7 +11,7 @@ const authMiddleware = async (req, res, next) => {
         .status(401)
         .json({ error: "Access denied. No token provided." });
     }
-
+    //Проверка подписи JWT
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
 
     const user = await prisma.user.findUnique({
@@ -21,7 +22,7 @@ const authMiddleware = async (req, res, next) => {
     if (!user) {
       return res.status(401).json({ error: "Invalid token. User not found." });
     }
-
+    //Добавление user в req
     req.user = user;
     next();
   } catch (error) {
@@ -29,6 +30,7 @@ const authMiddleware = async (req, res, next) => {
   }
 };
 
+//АВТОРИЗАЦИЯ
 const roleMiddleware = (roles) => {
   return (req, res, next) => {
     if (!req.user) {

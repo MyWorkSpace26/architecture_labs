@@ -1,7 +1,7 @@
-const { PrismaClient } = require('@prisma/client')
-
+const { PrismaClient } = require("@prisma/client");
+//логирование запросов Prisma для отладки и анализа SQL
 const prisma = new PrismaClient({
-  log: ['query', 'info', 'warn', 'error'],
-})
+  log: ["query", "info", "warn", "error"],
+});
 
-module.exports = prisma
+module.exports = prisma;

@@ -15,7 +15,6 @@ const updateUserRole = async (req, res) => {
     const { id } = req.params;
     const { role } = req.body;
 
-    // Проверяем, что пользователь не меняет свою роль
     if (req.user.id === id) {
       return res.status(400).json({ error: "Cannot change your own role" });
     }

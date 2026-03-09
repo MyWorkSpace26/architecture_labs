@@ -1,6 +1,7 @@
 require("dotenv").config();
 const express = require("express");
 const cors = require("cors");
+//Защита HTTP заголовков: XSS - Clickjacking - MIME sniffing
 const helmet = require("helmet");
 const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerUi = require("swagger-ui-express");
@@ -12,20 +13,24 @@ const taskRoutes = require("./routes/tasks");
 const userRoleRoutes = require("./routes/userRoles");
 const dashboardRoutes = require("./routes/dashboard");
 
+//Express создаёт HTTP server wrapper поверх Node.js
 const app = express();
 const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(helmet());
 app.use(
+  //CORS ограничивает доступ к API только доверенному клиентскому приложению
   cors({
     origin: process.env.CLIENT_URL || "http://localhost:5173",
     credentials: true,
   })
 );
+//JSON parser
 app.use(express.json());
 
 // Swagger configuration
+//Документация генерируется автоматически на основе JSDoc-комментариев в route-файлах
 const swaggerOptions = {
   definition: {
     openapi: "3.0.0",

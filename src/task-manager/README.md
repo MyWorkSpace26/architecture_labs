@@ -175,3 +175,23 @@ PATCH /api/users/:id/role
 | Middleware RBAC       | Чистая архитектура          |
 | UUID                  | Безопасность                |
 | Swagger               | Документация API            |
+
+---
+
+# Поток запроса
+
+Client
+↓
+CORS
+↓
+Helmet
+↓
+JSON parser
+↓
+Route
+↓
+Controller
+↓
+Prisma
+↓
+Database

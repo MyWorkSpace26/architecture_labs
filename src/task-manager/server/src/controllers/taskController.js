@@ -204,7 +204,6 @@ const deleteTask = async (req, res) => {
       return res.status(404).json({ error: "Task not found" });
     }
 
-    // Проверка владения задачей для MODERATOR
     if (req.user.role !== "ADMIN" && existingTask.createdBy !== req.user.id) {
       return res.status(403).json({ error: "Forbidden" });
     }
