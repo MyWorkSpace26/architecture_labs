@@ -27,42 +27,60 @@ const ServerSignature = () => {
   };
 
   const importPublicKey = async (pem) => {
-    const pemHeader = '-----BEGIN PUBLIC KEY-----';
-    const pemFooter = '-----END PUBLIC KEY-----';
-    const pemContents = pem.substring(pemHeader.length, pem.length - pemFooter.length).replace(/\s/g, '');
-    const binaryDer = Uint8Array.from(atob(pemContents), c => c.charCodeAt(0));
-    
-    return await window.crypto.subtle.importKey(
-      'spki',
-      binaryDer.buffer,
-      {
-        name: 'RSASSA-PKCS1-v1_5',
-        hash: 'SHA-256',
-      },
-      false,
-      ['verify']
-    );
-  };
+
+  const pemContents = pem
+    .replace("-----BEGIN PUBLIC KEY-----", "")
+    .replace("-----END PUBLIC KEY-----", "")
+    .replace(/\n/g, "")
+    .replace(/\r/g, "")
+    .trim();
+
+  const binaryDerString = atob(pemContents);
+
+  const binaryDer = new Uint8Array(binaryDerString.length);
+
+  for (let i = 0; i < binaryDerString.length; i++) {
+    binaryDer[i] = binaryDerString.charCodeAt(i);
+  }
+
+  return window.crypto.subtle.importKey(
+    "spki",
+    binaryDer.buffer,
+    {
+      name: "RSASSA-PKCS1-v1_5",
+      hash: "SHA-256"
+    },
+    false,
+    ["verify"]
+  );
+};
 
   const verifySignatureLocally = async (message, signature, publicKeyPem) => {
     try {
       const publicKey = await importPublicKey(publicKeyPem);
-      
+
       const encoder = new TextEncoder();
       const data = encoder.encode(message);
-      
-      const signatureBuffer = Uint8Array.from(atob(signature), c => c.charCodeAt(0));
-      
+
+      const binarySignature = atob(signature);
+      const signatureBytes = new Uint8Array(binarySignature.length);
+
+      for (let i = 0; i < binarySignature.length; i++) {
+        signatureBytes[i] = binarySignature.charCodeAt(i);
+      }
+
       const isValid = await window.crypto.subtle.verify(
-        'RSASSA-PKCS1-v1_5',
+        {
+          name: "RSASSA-PKCS1-v1_5"
+        },
         publicKey,
-        signatureBuffer,
+        signatureBytes.buffer,
         data
       );
-      
+
       return isValid;
     } catch (error) {
-      console.error('Error in local verification:', error);
+      console.error("Verification error:", error);
       return false;
     }
   };
@@ -77,12 +95,18 @@ const ServerSignature = () => {
       setMessage(response.message);
       setSignature(response.signature);
 
-      const result = await signatureApi.verifyServerSignature(
-        response.message,
-        response.signature
-      );
+      const isValid = await verifySignatureLocally(
+      response.message,
+      response.signature,
+      serverPublicKey
+    );
 
-      setVerificationResult(result);
+    setVerificationResult({
+      valid: isValid,
+      message: isValid
+        ? "Сообщение подлинное"
+        : "Подпись недействительна",
+    });
     } catch (error) {
       console.error('Error in generate and verify process:', error);
       setError('Ошибка при генерации и проверке сообщения');
@@ -109,7 +133,7 @@ const ServerSignature = () => {
             marginRight: '10px'
           }}
         >
-          {loading ? 'Загрузка...' : 'Обновить публичный ключ'}
+          {loading ? 'Загрузка...' : 'Запросить публичный ключ'}
         </button>
         
         <button
